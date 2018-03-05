@@ -15,7 +15,8 @@ def setup_logging(flask_app):
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter(
             '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
-        log_level = os.environ.get('FLASK_LOGGING_LEVEL', logging.getLevelName(logging.WARNING))
+        log_level = os.environ.get(
+            'FLASK_LOGGING_LEVEL', logging.getLevelName(logging.WARNING))
         handler.setLevel(log_level)
 
         flask_app.logger.addHandler(handler)
@@ -46,7 +47,8 @@ def recommender():
     r = {'recommendation': 'failure', 'external_request_id': None}
     status = 400
     input_json = request.get_json()
-    current_app.logger.debug('recommender/ request with payload: {p}'.format(p=input_json))
+    current_app.logger.debug(
+        'recommender/ request with payload: {p}'.format(p=input_json))
 
     if input_json and 'external_request_id' in input_json and input_json['external_request_id']:
         try:
@@ -71,7 +73,8 @@ def stack_aggregator():
     """Handle POST requests that are sent to /api/v1/stack_aggregator REST API endpoint."""
     s = {'stack_aggregator': 'failure', 'external_request_id': None}
     input_json = request.get_json()
-    current_app.logger.debug('stack_aggregator/ request with payload: {p}'.format(p=input_json))
+    current_app.logger.debug(
+        'stack_aggregator/ request with payload: {p}'.format(p=input_json))
     if input_json and 'external_request_id' in input_json and input_json['external_request_id']:
         try:
             persist = request.args.get('persist', 'true') == 'true'
