@@ -9,6 +9,5 @@ config.py
 error.log
 *.ipynb
 derby.log
-<<<<<<< HEAD
 metastore_db/
 .coverage
