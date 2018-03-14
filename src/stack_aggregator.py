@@ -25,7 +25,8 @@ def extract_component_details(component):
     """Extract details from given component."""
     github_details = {
         "dependent_projects":
-            component.get("package", {}).get("libio_dependents_projects", [-1])[0],
+            component.get("package", {}).get(
+                "libio_dependents_projects", [-1])[0],
         "dependent_repos": component.get("package", {}).get("libio_dependents_repos", [-1])[0],
         "total_releases": component.get("package", {}).get("libio_total_releases", [-1])[0],
         "latest_release_duration":
@@ -68,7 +69,8 @@ def extract_component_details(component):
     code_metrics = {
         "code_lines": component.get("version", {}).get("cm_loc", [-1])[0],
         "average_cyclomatic_complexity":
-            component.get("version", {}).get("cm_avg_cyclomatic_complexity", [-1])[0],
+            component.get("version", {}).get(
+                "cm_avg_cyclomatic_complexity", [-1])[0],
         "total_files": component.get("version", {}).get("cm_num_files", [-1])[0]
     }
 
@@ -171,7 +173,8 @@ def _extract_unknown_licenses(license_service_output):
             license_analysis = comp.get('license_analysis', {})
             if license_analysis.get('status', '') == 'Unknown':
                 pkg = comp.get('package', 'Unknown')
-                comp_unknown_licenses = license_analysis.get('unknown_licenses', [])
+                comp_unknown_licenses = license_analysis.get(
+                    'unknown_licenses', [])
                 for lic in comp_unknown_licenses:
                     really_unknown_licenses.append({
                         'package': pkg,
@@ -188,7 +191,8 @@ def _extract_unknown_licenses(license_service_output):
                 d = {
                     "package": pkg
                 }
-                comp_conflict_licenses = license_analysis.get('conflict_licenses', [])
+                comp_conflict_licenses = license_analysis.get(
+                    'conflict_licenses', [])
                 list_conflicting_pairs = []
                 for pair in comp_conflict_licenses:
                     assert (len(pair) == 2)
@@ -244,7 +248,8 @@ def perform_license_analysis(license_score_list, dependencies):
         # lic_response.raise_for_status()  # raise exception for bad http-status codes
         resp = lic_response.json()
     except requests.exceptions.RequestException:
-        current_app.logger.exception("Unexpected error happened while invoking license analysis!")
+        current_app.logger.exception(
+            "Unexpected error happened while invoking license analysis!")
         flag_stack_license_exception = True
 
     stack_license = []
@@ -257,7 +262,7 @@ def perform_license_analysis(license_score_list, dependencies):
         for comp in list_components:  # output from license analysis
             for dep in dependencies:  # the known dependencies
                 if dep.get('name', '') == comp.get('package', '') and \
-                                dep.get('version', '') == comp.get('version', ''):
+                        dep.get('version', '') == comp.get('version', ''):
                     dep['license_analysis'] = comp.get('license_analysis', {})
 
         _stack_license = resp.get('stack_license', None)
@@ -321,13 +326,16 @@ def aggregate_stack_data(stack, manifest_file, ecosystem, deps, manifest_file_pa
 
     # Call License Scoring to Get Stack License
     if persist:
-        license_analysis, dependencies = perform_license_analysis(license_score_list, dependencies)
-        stack_license_conflict = len(license_analysis.get('f8a_stack_licenses', [])) == 0
+        license_analysis, dependencies = perform_license_analysis(
+            license_score_list, dependencies)
+        stack_license_conflict = len(
+            license_analysis.get('f8a_stack_licenses', [])) == 0
     else:
         license_analysis = dict()
         stack_license_conflict = None
 
-    all_dependencies = {(dependency['package'], dependency['version']) for dependency in deps}
+    all_dependencies = {(dependency['package'], dependency[
+                         'version']) for dependency in deps}
     analyzed_dependencies = {(dependency['name'], dependency['version'])
                              for dependency in dependencies}
     unknown_dependencies = list()
@@ -335,21 +343,21 @@ def aggregate_stack_data(stack, manifest_file, ecosystem, deps, manifest_file_pa
         unknown_dependencies.append({'name': name, 'version': version})
 
     data = {
-            "manifest_name": manifest_file,
-            "manifest_file_path": manifest_file_path,
-            "user_stack_info": {
-                "ecosystem": ecosystem,
-                "analyzed_dependencies_count": len(dependencies),
-                "analyzed_dependencies": dependencies,
-                "unknown_dependencies": unknown_dependencies,
-                "unknown_dependencies_count": len(unknown_dependencies),
-                "recommendation_ready": True,  # based on the percentage of dependencies analysed
-                "total_licenses": len(stack_distinct_licenses),
-                "distinct_licenses": list(stack_distinct_licenses),
-                "stack_license_conflict": stack_license_conflict,
-                "dependencies": deps,
-                "license_analysis": license_analysis
-            }
+        "manifest_name": manifest_file,
+        "manifest_file_path": manifest_file_path,
+        "user_stack_info": {
+            "ecosystem": ecosystem,
+            "analyzed_dependencies_count": len(dependencies),
+            "analyzed_dependencies": dependencies,
+            "unknown_dependencies": unknown_dependencies,
+            "unknown_dependencies_count": len(unknown_dependencies),
+            "recommendation_ready": True,  # based on the percentage of dependencies analysed
+            "total_licenses": len(stack_distinct_licenses),
+            "distinct_licenses": list(stack_distinct_licenses),
+            "stack_license_conflict": stack_license_conflict,
+            "dependencies": deps,
+            "license_analysis": license_analysis
+        }
     }
     return data
 
@@ -359,7 +367,8 @@ def get_dependency_data(resolved, ecosystem):
     result = []
     for elem in resolved:
         if elem["package"] is None or elem["version"] is None:
-            current_app.logger.warning("Either component name or component version is missing")
+            current_app.logger.warning(
+                "Either component name or component version is missing")
             continue
 
         qstring = \
@@ -370,7 +379,8 @@ def get_dependency_data(resolved, ecosystem):
         payload = {'gremlin': qstring}
 
         try:
-            graph_req = get_session_retry().post(GREMLIN_SERVER_URL_REST, data=json.dumps(payload))
+            graph_req = get_session_retry().post(
+                GREMLIN_SERVER_URL_REST, data=json.dumps(payload))
 
             if graph_req.status_code == 200:
                 graph_resp = graph_req.json()
@@ -401,7 +411,8 @@ class StackAggregator:
         stack_data = []
         external_request_id = aggregated.get('external_request_id')
         # TODO multiple license file support
-        current_stack_license = aggregated.get('current_stack_license', {}).get('1', {})
+        current_stack_license = aggregated.get(
+            'current_stack_license', {}).get('1', {})
 
         for result in aggregated['result']:
             resolved = result['details'][0]['_resolved']
